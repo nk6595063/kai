@@ -8,8 +8,8 @@ const date ={
   console.log(dat);
       // Convert totalamound, interest, and months to integers
       const name = dat.name;
-      const totalamount = parseInt(dat.totalamount, 10);
-      const interest = parseInt(dat.interest, 10);
+      let totalamount = parseInt(dat.totalamount, 10);
+      const interest = parseFloat(dat.interest, 10);
       const months = parseInt(dat.months, 10);
   
       console.log(totalamount);
@@ -23,29 +23,23 @@ const date ={
       // Calculate vatti
       const vatti = (totalamount * interest) / 100;
       const totalVatti = vatti * months;
-      const totalamound =vatti+totalamount;
+      totalamount +=totalVatti;
+      const monthlypay =totalamount/months;
       console.log(vatti);
   
-      // Update dat object
-      // dat.vatti = totalVatti;
-      // dat.totalamound = totalVatti + totalAmount;
-  
-      console.log(dat.totalamount);
-  
-      // Construct empty object
       const full= {
         name: name,
         totalamount: totalamount,
         interest: interest,
         months: months,
         vatti: vatti,
-        totalVatti: totalVatti
+        totalVatti: totalVatti,
+        monthlypay:monthlypay
       };
   
       // Save to the database
       await mon.full(full);
       const result = await mon.date(dat);
-  
       return res.status(200).json(result);
     } catch (err) {
       return res.status(500).send(err);
@@ -77,6 +71,19 @@ amoundshow: async function (req, res) {
   }
 },
 
+pay: async function (req, res) {
+  try {
+    const name=req.body.name;
+    const pay=req.body.pay;
+     console.log(pay); 
+    const result = await mon.pay(name,pay); 
+    console.log(result);
+    return res.status(200).json(result);
+                                
+  } catch (err) {
+      return res.send(err);
+  }
+},
 
 
 

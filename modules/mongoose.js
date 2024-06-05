@@ -60,32 +60,32 @@ amoundshow: async (name) => {
   }
 },
 
+pay: async (name, pay) => {
+  try {
+    // Fetch the note based on the provided name
+    const notes = await Note.find({ name });
+    console.log(notes);
 
-// amoundshow:async function (dat) {
-//   try {
-//     const newNote = new Total(dat);
-  
-//     const result = await newNote.save();                                  
-//     return result;
-//   } catch (err) {
-//       return res.send(err);
-//   }
-// },
+    if (notes.length === 0) {
+      return { status: 'failed', message: 'Note not found' };
+    }
 
-// gettotal : async function (dat) {
-//   try {
-//     const result = await Total.findOne({ name: { $eq: dat } });
-//     console.log(result);
-//     if (!result) {
-//       throw new Error('Total not found');
-//     }
-//     const totalAmount = result.totalamound;
-//     return result;
-//   } catch (err) {
-//     console.error('Error fetching total:', err);
-//     return { status: 'failed', message: err.message };
-//   }
-// },
+    // Assuming you want to update the first note found with the given name
+    const note = notes[0];
+
+    // Calculate the remaining amount after payment
+    const remainingAmount = note.totalamount - pay;
+
+    // Update the note's total amount in the database
+    await Note.updateOne({ name: name }, { totalamount: remainingAmount });
+
+    console.log(note);
+    return remainingAmount;
+  } catch (err) {
+    console.error('Error fetching or updating note:', err);
+    return { status: 'failed', message: err.message };
+  }
+}
 
 
   }

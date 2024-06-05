@@ -24,9 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.post('/date',indexRouter.date);
 app.post('/dateget',indexRouter.dateget);
 app.post('/amoundshow',indexRouter.amoundshow);
-// app.post('/totalamound',indexRouter.totalamound);
-// app.post('/gettotal',indexRouter.gettotal);
-// app.use('/', indexRouter);
+app.put('/pay',indexRouter.pay);
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler

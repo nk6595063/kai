@@ -8,6 +8,7 @@ const noteSchema = new mongoose.Schema({
     totalamount: { type: Number, min: 0 },
     vatti: {type:Number, min: 0},
     totalVatti:{type:Number, min: 0},
+    monthlypay:{type:Number, min: 0},
 });
 
 const Note = mongoose.model('Note', noteSchema);
