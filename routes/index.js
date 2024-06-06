@@ -2,44 +2,43 @@ const mon = require('../modules/mongoose');
 
 const date ={
   date: async function (req, res) {
-    try {
-      // Add current date to the request body
-      const dat = { ...req.body, currentDate: new Date() };
-  console.log(dat);
-      // Convert totalamound, interest, and months to integers
-      const name = dat.name;
-      let totalamount = parseInt(dat.totalamount, 10);
-      const interest = parseFloat(dat.interest, 10);
-      const months = parseInt(dat.months, 10);
   
-      console.log(totalamount);
-      console.log(interest);
-  
-      // Validate inputs
-      if (isNaN(totalamount) || isNaN(interest) || isNaN(months)) {
-        return res.status(400).send("Invalid input values for total amount, interest, or months");
-      }
-  
-      // Calculate vatti
-      const vatti = (totalamount * interest) / 100;
-      const totalVatti = vatti * months;
-      totalamount +=totalVatti;
-      const monthlypay =totalamount/months;
-      console.log(vatti);
-  
-      const full= {
-        name: name,
-        totalamount: totalamount,
-        interest: interest,
-        months: months,
-        vatti: vatti,
-        totalVatti: totalVatti,
-        monthlypay:monthlypay
-      };
-  
-      // Save to the database
-      await mon.full(full);
-      const result = await mon.date(dat);
+      try {
+        const currentDate = new Date();
+       
+        const dat = { ...req.body, currentDate };
+        console.log(dat);
+    
+        // Extract and convert values
+        const { name, totalamount, interest, months } = dat;
+        const totalAmount = parseFloat(totalamount);
+        const interestRate = parseFloat(interest);
+        const numMonths = parseInt(months, 10);
+    
+        // Validate inputs
+        if (isNaN(totalAmount) || isNaN(interestRate) || isNaN(numMonths)) {
+          return res.status(400).send("Invalid input values for total amount, interest, or months");
+        }
+    
+        // Calculate vatti and other values
+        const vatti = (totalAmount * interestRate) / 100;
+        const totalVatti = vatti * numMonths;
+        const updatedTotalAmount = totalAmount + totalVatti;
+        const monthlyPay = updatedTotalAmount / numMonths;
+    
+        console.log({ totalAmount, interestRate, numMonths, vatti, totalVatti, updatedTotalAmount, monthlyPay });
+    
+        const full ={
+          name,
+          totalamount: updatedTotalAmount,
+          interest: interestRate,
+          months: numMonths,
+          totalVatti,
+          monthlypay: monthlyPay,
+          currentDate
+        };
+      await mon.date(dat);
+      const result = await mon.full(full);
       return res.status(200).json(result);
     } catch (err) {
       return res.status(500).send(err);
@@ -58,11 +57,11 @@ dateget: async function (req, res) {
       return res.send(err);
   }
 },
-amoundshow: async function (req, res) {
+pill: async function (req, res) {
   try {
-    const name = req.body.name;
-     console.log(name); 
-    const result = await mon.amoundshow(name); 
+    const id = req.body.id;
+     console.log(id); 
+    const result = await mon.pill(id); 
     console.log(result);
     return result==='false'?(res.status(404).json({result:'not register'})):( res.status(200).json({result:'success',result}));  
                                 
@@ -73,11 +72,10 @@ amoundshow: async function (req, res) {
 
 pay: async function (req, res) {
   try {
-    const name=req.body.name;
-    const pay=req.body.pay;
-     console.log(pay); 
-    const result = await mon.pay(name,pay); 
-    console.log(result);
+    const id=req.body.id;
+    const pay=parseInt(req.body.pay);
+    const result = await mon.pay(id,pay); 
+    // console.log(result);
     return res.status(200).json(result);
                                 
   } catch (err) {

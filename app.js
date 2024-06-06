@@ -23,7 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/date',indexRouter.date);
 app.post('/dateget',indexRouter.dateget);
-app.post('/amoundshow',indexRouter.amoundshow);
+app.post('/pill',indexRouter.pill);
 app.put('/pay',indexRouter.pay);
 app.use('/users', usersRouter);
 

@@ -2,13 +2,23 @@ const express = require('express');
 const mongoose = require('mongoose');
 const  { Note}  =require('../schema');
 const  { Empty }  =require('../schema1');
+const  { Pill }  =require('../pill');
 const { dbUrl } = require("../dbms");
 mongoose.connect(dbUrl);
 
 const mongoo = {
   date: async (dat) => {
     try {
-      const result = await Empty.create(dat);
+     await Empty.create(dat);
+    } catch (err) {
+      console.error('Error in MongoDB function:', err);
+      return { status: 'failed', message: err.message };
+    }
+  },
+
+ full: async (full) => {
+    try {
+      const result = await Note.create(full);
       return result;
     } catch (err) {
       console.error('Error in MongoDB function:', err);
@@ -16,21 +26,10 @@ const mongoo = {
     }
   },
 
- full: async (empty) => {
-    try {
-      const full = await Note.create(empty);
-      return full;
-    } catch (err) {
-      console.error('Error in MongoDB function:', err);
-      return { status: 'failed', message: err.message };
-    }
-  },
-
-  
   dateget: async (startDate, endDate) => {
     try {
         const notes = await Note.find({
-          date: {
+          currentDate: {
             $gt: new Date(startDate),
             $lt: new Date(endDate)
         }
@@ -42,52 +41,68 @@ const mongoo = {
     }
 },
 
-amoundshow: async (name) => {
+pill : async (id) => {
   try {
-    const result = await Note.find({ name: { $eq: name } });
+    const result = await Pill.find({noteId:{$eq :id}});
 
-    if (!result || result.length === 0) {
-      return `false`;
+    if (!result) {
+      return { status: 'failed', message: 'ID not available' };
     }
 
-    console.log(result);
-    console.log(result[0]['totalamound']);
-
-    return result[0]['totalamound'];
+    return result;
   } catch (err) {
     console.error('Error in MongoDB function:', err);
     return { status: 'failed', message: err.message };
   }
 },
 
-pay: async (name, pay) => {
+pay: async (id, payAmount) => {
   try {
-    // Fetch the note based on the provided name
-    const notes = await Note.find({ name });
-    console.log(notes);
+    
+    const note = await Note.findById(id);
+    console.log(note);
 
-    if (notes.length === 0) {
+    // If note not found, return a failure message
+    if (!note) {
       return { status: 'failed', message: 'Note not found' };
     }
 
-    // Assuming you want to update the first note found with the given name
-    const note = notes[0];
+    if (note.totalamount < payAmount) {
+      return { status: 'failed', message: 'your amound is too long .' };
+    }
+
+    console.log(note.totalamount);
 
     // Calculate the remaining amount after payment
-    const remainingAmount = note.totalamount - pay;
+    const remainingAmount = note.totalamount - payAmount;
 
-    // Update the note's total amount in the database
-    await Note.updateOne({ name: name }, { totalamount: remainingAmount });
+    // Update the note with the remaining amount
+    await Note.findByIdAndUpdate(id, { totalamount: remainingAmount });
 
-    console.log(note);
-    return remainingAmount;
+    // Determine the payment status
+    let statusMessage;
+    switch (true) {
+      case note.monthlypay === payAmount:
+        statusMessage = "success";
+        break;
+      case note.monthlypay > payAmount:
+        statusMessage = "pending";
+        break;
+      case note.monthlypay < payAmount:
+        statusMessage = "next month already pay";
+        break;
+      default:
+        statusMessage = "Unknown payment status";
+    }
+
+    const result = await Pill.create({ statusMessage, payAmount, noteId:note._id});
+
+    return { status: 'success', remainingAmount, message: statusMessage };
   } catch (err) {
     console.error('Error fetching or updating note:', err);
     return { status: 'failed', message: err.message };
   }
 }
-
-
-  }
+}
 
 module.exports = mongoo;
