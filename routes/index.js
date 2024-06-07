@@ -9,7 +9,7 @@ const date ={
         const dat = { ...req.body, currentDate };
         console.log(dat);
     
-        // Extract and convert values
+        // Extract and convert values     
         const { name, totalamount, interest, months } = dat;
         const totalAmount = parseFloat(totalamount);
         const interestRate = parseFloat(interest);
@@ -83,8 +83,20 @@ pay: async function (req, res) {
   }
 },
 
-
+pill_status: async function (req, res) {
+  try {
+    const id=req.body.id;
+    const status=req.body.status;
+    const result = await mon.pill_status(id, status); 
+    // console.log(result);
+    return res.status(200).json(result);
+                                
+  } catch (err) {
+      return res.send(err);
+  }
+},
 
 };
+
 
 module.exports = date;

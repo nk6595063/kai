@@ -26,7 +26,9 @@ app.post('/dateget',indexRouter.dateget);
 app.post('/pill',indexRouter.pill);
 app.put('/pay',indexRouter.pay);
 app.use('/users', usersRouter);
+app.post('/pill_status',indexRouter.pill_status);
 
+// app.get('/calculateDateDifference',indexRouter.calculateDateDifference);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));

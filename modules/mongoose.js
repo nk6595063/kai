@@ -57,8 +57,7 @@ pill : async (id) => {
 },
 
 pay: async (id, payAmount) => {
-  try {
-    
+  try {   
     const note = await Note.findById(id);
     console.log(note);
 
@@ -67,8 +66,8 @@ pay: async (id, payAmount) => {
       return { status: 'failed', message: 'Note not found' };
     }
 
-    if (note.totalamount < payAmount) {
-      return { status: 'failed', message: 'your amound is too long .' };
+    if (payAmount > note.totalamount || payAmount >  note.monthlypay ) {
+      return { status: 'failed', message: 'your payment  amound is too long .' };
     }
 
     console.log(note.totalamount);
@@ -79,20 +78,14 @@ pay: async (id, payAmount) => {
     // Update the note with the remaining amount
     await Note.findByIdAndUpdate(id, { totalamount: remainingAmount });
 
-    // Determine the payment status
+  
     let statusMessage;
-    switch (true) {
-      case note.monthlypay === payAmount:
-        statusMessage = "success";
-        break;
-      case note.monthlypay > payAmount:
-        statusMessage = "pending";
-        break;
-      case note.monthlypay < payAmount:
-        statusMessage = "next month already pay";
-        break;
-      default:
-        statusMessage = "Unknown payment status";
+    if (payAmount === note.monthlypay) {
+      statusMessage = 'success';
+    } else if (payAmount < note.monthlypay) {
+      statusMessage = 'pending';
+    } else {
+      statusMessage = 'Unknown payment status';
     }
 
     const result = await Pill.create({ statusMessage, payAmount, noteId:note._id});
@@ -102,7 +95,22 @@ pay: async (id, payAmount) => {
     console.error('Error fetching or updating note:', err);
     return { status: 'failed', message: err.message };
   }
-}
+},
+
+pill_status : async (id, status) => {
+  try {
+    const get = await Pill.find({ noteId: id, statusMessage: status });
+    console.log(get);
+    if (!get || get.length === 0) {
+      return { status: 'failed', message: 'ID not available or status not available' };
+    }
+    return get;
+  } catch (err) {
+    console.error('Error in MongoDB function:', err);
+    return { status: 'failed', message: err.message };
+  }
+},
+
 }
 
 module.exports = mongoo;
